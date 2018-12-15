@@ -4,7 +4,7 @@
   <artifactId>libarary</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
-  <dependencies>
+  <dependencies>fdsafffdsaf你大爷的
 		<!-- https://mvnrepository.com/artifact/com.mchange/c3p0 -->
 		<dependency>
 			<groupId>com.mchange</groupId>
