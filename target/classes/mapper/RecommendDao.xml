@@ -1,0 +1,45 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.sx.libarary.dao.RecommendDao">
+ 	<select id="queryRecommend" resultType="com.sx.libarary.entity.Recommend">
+ 		select  
+	 	recommend_id, recommend_user_id, recommend_book_name, recommend_book_author, recommend_book_status, 
+	    recommend_create_time from tb_recommend 
+	    where 
+	    recommend_id=#{id}
+	    and code =0
+ 	</select>
+ 	<select id="queryRecommends" resultType="com.sx.libarary.entity.Recommend">
+ 		select  
+	 	recommend_id, recommend_user_id, recommend_book_name, recommend_book_author, recommend_book_status, 
+	    recommend_create_time from tb_recommend where code=0
+ 	</select>
+ 	<insert id="insertRecommend" parameterType="com.sx.libarary.entity.Recommend">
+ 		insert into tb_recommend (recommend_user_id, recommend_book_name, recommend_book_author, recommend_book_status, 
+	    recommend_create_time) 
+	    VALUES (#{recommendUserId},#{recommendBookName},#{recommendBookAuthor},#{recommendBookStatus},
+	    #{recommendCreateTime})
+ 	</insert>
+
+ 	<update id="updateRecommend" parameterType="com.sx.libarary.entity.Recommend">
+ 		update tb_recommend
+ 		<set>
+ 			<if test="recommendUserId">recommend_user_id=#{recommendUserId},</if>
+ 			<if test="recommendBookName">recommend_book_name=#{recommendBookName},</if>
+ 			<if test="recommendBookAuthor">recommend_book_author=#{recommendBookAuthor},</if>
+ 			<if test="recommendBookStatus">recommend_book_status=#{recommendBookStatus},</if>
+ 			<if test="recommendCreateTime">recommend_create_time=#{recommendCreateTime}</if>
+ 		</set>
+ 		where
+ 		recommend_id=#{recommendId}
+ 	</update>
+ 	<update id="deleteRecommend" parameterType="com.sx.libarary.entity.Recommend">
+ 		update tb_recommend
+ 		<set>
+ 			<if test="code != null">code=#{code}</if>
+ 		</set>
+ 		where
+ 		recommend_id=#{recommendId}
+ 	</update>
+ </mapper>

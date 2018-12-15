@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>图书管理</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(function () {
+            var bookID;
+            var userID;
+            var days;
+           var searchBook="http://localhost:8080/libarary/getbookbyparams";
+            $("#searchBook").click(function () {
+                var book={};
+                var bookname=$("#bookname").val();
+                var author=$("#author").val();
+                var isbn=$("#isbn").val();
+                if(bookname!=null && bookname!=""){
+               		 book.bookName=bookname;
+                }
+                if(author!=null && author!=""){
+                	book.bookAuthor=author;
+                }
+                if(isbn!=null && isbn!=""){
+                	book.bookIsbm=isbn;
+                }
+                console.log(book);
+                var formData=new FormData();
+                formData.append("bookParam",JSON.stringify(book));
+                $.ajax({
+                    url:searchBook,
+                    type:'POST',
+                    contentType:false,
+                    processData:false,
+                    cash:false,
+                    data:formData,
+                    success:function (result) {
+                        build_book_table(result)
+                    }
+                })
+            })
+            function build_book_table(result) {
+                console.log("11")
+                $("#book_table tbody").empty();
+                var books = result.data.books;
+                $.each(books, function (index, item) {
+
+                    var idTD = $("<td></td>").append(item.bookId);
+                   
+                    var nameTD = $("<td></td>").append(item.bookName);
+                    var authorTD = $("<td></td>").append(item.bookAuthor);
+                    var isbnTD = $("<td></td>").append(item.bookIsbm);
+                    var priceTD = $("<td></td>").append(item.bookPrice);
+                    var typeNameTD = $("<td></td>").append(item.type.typeSecondName);
+                    var pressNameTD = $("<td></td>").append(item.press.pressName);
+                    var bookCaseTD = $("<td></td>").append(item.bookcase.bookcaseName);
+                    var status=item.bookStatus;
+                    if(status == 0 ){
+                        var statusTD = $("<td></td>").append("预约中");
+                    }
+                    if(status==1 ){
+                        var statusTD = $("<td></td>").append("不可借");
+                    }
+                    if(status==2 )
+                    {
+                        var statusTD = $("<td></td>").append("可借");
+                    }
+                    if(status!=1 ){
+                    var Edit = $("<button></button>").addClass("btn btn-primary btn-sm edit").append(
+                        $("<span></span>").addClass("glyphicon glyphicon-pencil")).append("借阅");
+                    }else{
+                        var Edit = $("<button disabled='true'></button>").addClass("btn btn-primary btn-sm edit").append(
+                            $("<span></span>").addClass("glyphicon glyphicon-pencil")).append("借阅");
+                    }
+                    Edit.attr("editStudent", item.bookId);
+                    var addTD = $("<td></td>").append(Edit);
+                    $("<tr></tr>").append(idTD)
+                        .append(nameTD)
+                        .append(authorTD)
+                        .append(isbnTD)
+                        .append(priceTD)
+                        .append(statusTD)
+                        .append(typeNameTD)
+                        .append(pressNameTD)
+                        .append(bookCaseTD)
+                        .append(addTD)
+                        .appendTo("#book_table tbody");
+                })
+            }
+            //更新商品按钮事件majors_update
+            $(document).on("click", ".edit", function () {
+                //console.log("22")
+                //$("#majors_update").empty();
+                id=$(this).attr("editStudent");
+               // var id = $(this).attr("editStudent");
+               // bookID = id;
+                bookID=id;
+                reset_Form("#UpdateForm");
+                $('#stuUpdate').modal();
+            })
+            //点击之前将表单数据删除
+            function reset_Form(elem) {
+                //清除表单数据
+                $(elem)[0].reset();
+                //清除校验状态
+                $(elem).find("*").removeClass("has-success has-error");
+                //清除提示信息
+                $(elem).find(".help-block").text("");
+            }
+            //根据学号查找用户
+            var searchUsers="http://localhost:8080/libarary/getuser4";
+            $("#searchUsers").click(function () {
+                var useraa={};
+                var xuehao=$("#xuehao").val();
+                if(xuehao!=null && xuehao!=""){
+                    useraa.userXuehao=xuehao;
+                }
+                console.log(useraa);
+                var formData=new FormData();
+                formData.append("userStr",JSON.stringify(useraa));
+                $.ajax({
+                    url:searchUsers,
+                    type:'POST',
+                    contentType:false,
+                    processData:false,
+                    cash:false,
+                    data:formData,
+                    success:function (result) {
+                        build_user_data(result)
+                    }
+                })
+            })
+            function build_user_data(result) {
+            
+                $("#userdata").empty();
+                var users = result.data.user;
+                var bookNum= result.data.bookNum;
+          
+          			
+                    var idTD = $("<div class='text-muted col-md-12' style='font-size: 20px;'></div>").append('用户编号：'+users.userId);
+                    userID=users.userId;
+                    var nameTD = $("<div class='text-muted col-md-12' style='font-size: 20px;'></div>").append('姓名：'+users.userName);
+                    var xuehaoTD = $("<div class='text-muted col-md-12' style='font-size: 20px;'></div>").append('学号/工号：'+users.userXuehao);
+
+                    var type=users.userType.userType;
+
+                    if(type == 1 ){
+                        var typeTD = $("<div class='text-muted col-md-12' style='font-size: 20px;'></div>").append("身份：教师");
+                    }
+                    if(type==2 ){
+                        var typeTD = $("<div class='text-muted col-md-12' style='font-size: 20px;'></div>").append("身份：学生");
+                    }
+                    if(type==3 )
+                    {
+                        var typeTD = $("<div class='text-muted col-md-12' style='font-size: 20px;'></div>").append("身份：管理员");
+                    }
+                    var num=users.userType.userTypeNum-bookNum;
+                    var numTD=$("<div class='text-muted col-md-12' style='font-size: 20px;'></div>").append('可借书数：'+num);
+                    var dayTD=$("<div class='text-muted col-md-12' style='font-size: 20px;'></div>").append('可借天数：'+users.userType.userTypeDay);
+                    days=users.userType.userTypeDay;
+                    $("<div></div>").append(idTD)
+                        .append(nameTD)
+                        .append(xuehaoTD)
+                        .append(typeTD)
+                         .append(numTD)
+                        .append(dayTD)
+                        .appendTo("#userdata");
+                    $("#but").empty();
+
+                //var closeTD = $("<button type='button' data-dismiss='modal'></button>").addClass("btn btn-default").append("关闭");
+                    var btnTD = $("<button type='button' id='sub' data-dismiss='modal'></button>").addClass("btn btn-primary").append("借阅")
+                   //     .append(closeTD)
+                        .append(btnTD)
+                        .appendTo("#but");
+              
+            }
+            var sub="http://localhost:8080/libarary/jieshu";
+            $(document).on("click","#sub",function(){
+                var brrow={};
+                brrow.brrowBookId=bookID;
+           		brrow.brrowBookUser=userID;
+				
+            var formData=new FormData();
+            console.log("days"+days)
+            formData.append("days",days);
+            formData.append("brrowStr",JSON.stringify(brrow));
+            $.ajax({
+                url:sub,
+                type:'POST',
+                data:formData,
+                contentType:false,
+                processData:false,
+                cash:false,
+                success:function (result) {
+                    if(result.data.success){
+                        alert("借阅成功");
+                    }else {
+                        alert("借阅失败");
+                    }
+                }
+            })
+            })
+
+        })
+    </script>
+</head>
+<body>
+<!-- Modal 查找用户信息-->
+<div class="modal fade" id="stuUpdate" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="height:100%;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="UpdateModalLabel">借阅操作</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="UpdateForm">
+                    <input type="text" hidden name="productId" id="productId"/>
+                    <div class="form-group">
+                        <label for="name" class="col-sm-2 control-label">学号/工号</label>
+                        <div class="col-sm-10 ">
+                            <input type="text" class="form-control" id="xuehao" name="name" placeholder="请输入学号/工号">
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div id="userdata">
+
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" id="but" style="border-top:0;">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+
+                <button type="button" class="btn btn-primary" id="searchUsers">提交</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<h2 align="center">图书借阅</h2>
+<div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" style="width: 100px; margin-bottom: 0px;">图书名称：</label>
+        <div class="col-xs-2" >
+            <input type="text" class="form-control" placeholder="输入图书名称" id="bookname">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label"
+               style="width: 100px; margin-bottom: 0px;">图书作者：</label>
+        <div class="col-xs-2" >
+            <input type="text" class="form-control" placeholder="输入作者" id="author">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label"
+               style="width: 100px; margin-bottom: 0px;">ISBN号：</label>
+        <div class="col-xs-2" >
+            <input type="text" class="form-control" placeholder="输入ISBN号" id="isbn">
+        </div>
+    </div>
+
+
+    <!-- Deemphasize a button by making it look like a link while maintaining button behavior -->
+    <button type="button" id="searchBook" class="btn btn-primary col-xs-4" style="width: 100px;">搜索</button>
+    <br> <br><br>
+
+</div>
+<div class="table-responsive">
+    <table  class="table table-bordered table-hover"id="book_table">
+        <thead>
+        <tr class="bg-warning">
+            <th>图书编号</th>
+            <th>图书名称</th>
+            <th>作者</th>
+            <th>ISBN</th>
+            <th>图书价格</th>
+            <th>图书状态</th>
+            <th>图书种类</th>
+            <th>出版社</th>
+            <th>书架</th>
+            <th>借阅   </th>
+        </tr>
+
+        </thead>
+        <tbody id="stuInfo" class="bg-warning">
+        </tbody>
+
+
+
+    </table>   </div>
+<div class="row" >
+    <div class="col-md-6" id="page_info_area"></div>
+    <div class="col-md-6" id="page_nav_area"></div>
+</div>
+
+
+
+</body>
+</html>

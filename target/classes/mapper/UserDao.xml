@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sx.libarary.dao.UserDao">
+	<resultMap id="UserMap" type="com.sx.libarary.entity.User">
+		<id column="user_id"  property="userId" />
+	    <result column="user_name"  property="userName" />
+	    <result column="user_password"  property="userPassword" />
+	    <result column="user_email"  property="userEmail" />
+	    <result column="user_gender" property="userGender" />
+	    <result column="user_status"  property="userStatus" />
+	    <result column="user_reg_time"  property="userRegTime" />
+    	<result column="user_xuehao" property="userXuehao" />
+		<association property="userType" column="user_type_id" javaType="com.sx.libarary.entity.UserType">
+			<id column="user_type_id" property="userTypeId"></id>
+			<result column="user_type" property="userType"/>
+			<result column="user_type_num" property="userTypeNum"/>
+			<result column="user_type_day" property="userTypeDay"/>
+		</association>
+	</resultMap>
+    <select id="queryUsers" resultMap="UserMap">
+		SELECT
+		user_id, user_type_id, user_name, user_password, user_email, user_gender, user_status, 
+    	user_reg_time, user_xuehao
+		FROM
+		tb_user
+		where code=0
+		ORDER BY
+		user_id DESC;
+	</select>
+	
+	<select id="queryUserByParams" resultMap="UserMap">
+		SELECT
+		user_id, user_type_id, user_name, user_password, user_email, user_gender, user_status, 
+    	user_reg_time, user_xuehao
+		FROM
+		tb_user
+		<where>
+			<if test="user.userName !=null">
+				and user_name=#{user.userName} 
+			</if>
+			<if test="user.userPassword !=null">
+				and user_password=#{user.userPassword} 
+			</if>
+			<if test="user.userType !=null and user.userType.userTypeId !=null">
+				and user_type_id=#{user.userType.userTypeId}
+			</if>
+			<if test="user.userXuehao !=null">
+				and user_xuehao=#{user.userXuehao}
+			</if>
+			<if test="user.userStatus !=null">
+				and user_status=#{user.userStatus}
+			</if>
+		</where>
+		and
+		code = 0
+	</select>
+	 <select id="queryUser" resultMap="UserMap">
+		SELECT
+		user_id, user_type_id, user_name, user_password, user_email, user_gender, user_status, 
+    	user_reg_time, user_xuehao
+		FROM
+		tb_user
+		where
+		user_id=#{id}
+		and code=0
+	</select>
+	
+	<insert id="insertUser" >
+		insert into tb_user(user_type_id, user_name, user_password, user_email, user_gender, user_status, 
+    	user_reg_time, user_xuehao)
+		values
+		(#{userTypeId},#{userName},#{userPassword},#{userEmail},#{userGender},#{userStatus},
+		#{userRegTime},#{userXuehao})
+	</insert>
+	
+	<update id="updateUser" parameterType="com.sx.libarary.entity.User">
+		update tb_user 
+	    <set>
+	      <if test="userId != null">
+	        user_id = #{userId},
+	      </if>
+	      <if test="userTypeId != null">
+	        user_type_id = #{type.userTypeId},
+	      </if>
+	      <if test="userName != null">
+	        user_name = #{userName},
+	      </if>
+	      <if test="userPassword != null">
+	        user_password = #{userPassword},
+	      </if>
+	      <if test="userEmail != null">
+	        user_email = #{userEmail},
+	      </if>
+	      <if test="userStatus != null">
+	        user_status = #{userStatus}
+	      </if>
+	    </set>
+	    where user_id=#{userId}
+	</update>
+	<update id="deleteUser" parameterType="com.sx.libarary.entity.User">
+		update tb_user 
+	    <set>
+	     	<if test="code != null">code=#{code}</if>
+	    </set>
+	    where user_id=#{userId}
+	</update>
+
+</mapper>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script>
+        window.onload = function () {
+            var get = 'http://localhost:8080/libarary/getbook2';
+            showPage();
+
+            function showPage() {
+                $.ajax({
+                    url: get,
+
+                    type: "GET",
+                    success: function (result) {
+                        //显示商品数据
+                        build_return_table(result)
+                        console.log(result)
+                        //显示分页信息
+                        // build_page_info(result);
+                        //显示页面导航信息
+                        //  build_page_nav(result);
+                    }
+                })
+            } ;
+            //  build_page_info(result);
+            //  build_page_nav(result);
+            function build_return_table(result) {
+                console.log("11")
+                $("#return_table tbody").empty();
+                var books = result.data.books;
+                var tempPage = result.data.books.pageNum;
+                $.each(books, function (index, item) {
+
+                    var idTD = $("<td></td>").append(item.book.bookId);
+                    var nameTD = $("<td></td>").append(item.book.bookName);
+
+                    var usernameTD = $("<td></td>").append(item.user.userName);
+                 //   var usertypeTD = $("<td></td>").append(item.user.userType.userType);
+                    var status=item.brrowBookStatus;
+                    if(status == 0 ){
+                        var statusTD = $("<td></td>").append("预约中");
+                    }
+                    if(status==1 ){
+                        var statusTD = $("<td></td>").append("借阅中");
+                    }
+                    if(status==2 )
+                    {
+                        var statusTD = $("<td></td>").append("已归还");
+                    }
+                    var jieshuTD = $("<td></td>").append(new Date(item.brrowBookJieshu).toLocaleDateString());
+                    var huanshuTD = $("<td></td>").append(new Date(item.brrowBookHuanshu).toLocaleDateString());
+                    var deleteD = $("<button></button>").addClass("btn btn-success btn-sm delete").append(
+                        $("<span></span>").addClass("glyphicon glyphicon-trash")).append("删除");
+                    deleteD.attr("deleteStudent", item.bookId);
+                    //    deleteD.attr("currPage", tempPage);
+                    var Edit = $("<button></button>").addClass("btn btn-primary btn-sm edit").append(
+                        $("<span></span>").addClass("glyphicon glyphicon-pencil")).append("更新");
+                    Edit.attr("editStudent", item.bookId);
+                    //Edit.attr("currPage", tempPage);
+                    var deleteTD = $("<td></td>").append(deleteD);
+                    var addTD = $("<td></td>").append(Edit);
+                    $("<tr></tr>").append(idTD)
+
+                        .append(nameTD)
+                        .append(usernameTD)
+                        //.append(usertypeTD)
+                        .append(statusTD)
+                        .append(jieshuTD)
+                        .append(huanshuTD)
+
+                        .appendTo("#return_table tbody");
+                })
+            }
+        }
+    </script>
+</head>
+<body>
+<h2 align="center">已归还</h2>
+<div class="table-responsive">
+    <table  class="table table-bordered table-hover"id="return_table">
+        <thead>
+        <tr class="bg-danger">
+
+            <th>图书编号</th>
+            <th>图书名称</th>
+            <th>借阅人</th>
+            <th>图书状态</th>
+            <th>借出日期</th>
+            <th>归还日期</th>
+        </tr>
+
+        </thead>
+        <tbody id="stuInfo" class="bg-danger">
+        </tbody>
+
+
+
+    </table>   </div>
+<div class="row" >
+    <div class="col-md-6" id="page_info_area"></div>
+    <div class="col-md-6" id="page_nav_area"></div>
+</div>
+</body>
+</html>

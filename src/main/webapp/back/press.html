@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+
+        window.onload = function () {
+             var get = 'http://localhost:8080/libarary/getpress';
+             var deletepress = 'http://localhost:8080/libarary/deletepress/';
+             showPage();
+
+            function showPage() {
+                $.ajax({
+                    url: get,
+                    type: "GET",
+                    success: function (result) {
+                        //显示商品数据
+                        build_press_table(result)
+                        console.log(result)
+                        //显示分页信息
+                        // build_page_info(result);
+                        //显示页面导航信息
+                        //  build_page_nav(result);
+                    }
+                })
+            } ;
+
+            function build_press_table(result) {
+                console.log("11")
+                $("#press_table tbody").empty();
+                var presses = result.data.presses;
+                var tempPage = result.data.presses.pageNum;
+                $.each(presses, function (index, item) {
+
+
+                    var idTD = $("<td></td>").append(item.pressId);
+                    var nameTD = $("<td></td>").append(item.pressName);
+
+                    var deleteD = $("<button></button>").addClass("btn btn-success btn-sm delete").append(
+                        $("<span></span>").addClass("glyphicon glyphicon-trash")).append("删除");
+                    deleteD.attr("deletePress", item.pressId);
+                    //    deleteD.attr("currPage", tempPage);
+
+
+                    //Edit.attr("currPage", tempPage);
+                    var deleteTD = $("<td></td>").append(deleteD);
+                    $("<tr></tr>").append(idTD)
+                        .append(nameTD)
+                        .append(deleteTD)
+                        .appendTo("#press_table tbody");
+                })
+            }
+            //删除单个商品
+            $(document).on("click", ".delete", function () {
+                var id = $(this).attr("deletePress");
+                var name = $(this).parent().parent().find("td:eq(1)").text();
+
+                var isDelete = confirm("确定要删除[" + name + "]的出版社信息吗？");
+                if (isDelete) {
+                    $.ajax({
+                        url: deletepress + id,
+                        type: "DELETE",
+                        success: function (result) {
+                            if (result.code == 0) {
+                            	   alert("删除成功");
+                                showPage();
+                            } else {
+                                alert("删除出版社信息出错，请重试！！！");
+                            }
+                        }
+                    })
+                }
+            })
+            //添加出版社
+            var addPress="http://localhost:8080/libarary/addpress";
+            $("#addpress").click(function () {
+                var press={};
+                press.pressName=$("#pressname").val();
+                console.log(press);
+                var formData=new FormData();
+                formData.append("pressStr",JSON.stringify(press));
+                $.ajax({
+                    url:addPress,
+                    type:'POST',
+                    data:formData,
+                    contentType:false,
+                    processData:false,
+                    cash:false,
+                    success:function (result) {
+                        if(result.data.success){
+                            alert("添加成功");
+                            showPage();
+                        }else {
+                            alert("添加失败");
+                        }
+                    }
+                })
+            })
+            //添加商品按钮事件
+            $("#Add").click(function () {
+                reset_Form("#UpdateForm");
+                $('#pressAdd').modal();
+            })
+            //点击之前将表单数据删除
+            function reset_Form(elem) {
+                //清除表单数据
+                $(elem)[0].reset();
+                //清除校验状态
+                $(elem).find("*").removeClass("has-success has-error");
+                //清除提示信息
+                $(elem).find(".help-block").text("");
+            }
+
+        }
+
+    </script>
+</head>
+<body>
+<!-- Modal 添加出版社信息-->
+<div class="modal fade" id="pressAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="height:100%;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="UpdateModalLabel">添加出版社操作</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="UpdateForm">
+                    <input type="text" hidden name="productId" id="productId"/>
+                    <div class="form-group">
+                        <label for="name" class="col-sm-3 control-label">出版社名称:</label>
+                        <div class="col-sm-9 ">
+                            <input type="text" class="form-control" id="pressname" name="name" placeholder="请输入出版社名称">
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer" id="but">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+
+                <button type="button" class="btn btn-primary" id="addpress" data-dismiss="modal">提交</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<button type="button" id="Add" class="btn btn-warning col-xs-2" style="
+    margin-left: 30px;">添加</button>
+<h2 align="center"style="
+    margin-right: 100px;">出版社管理</h2>
+
+<div class="table-responsive">
+    <table  class="table table-bordered table-hover"id="press_table">
+        <thead>
+        <tr class="bg-warning">
+
+            <th>出版社编号</th>
+            <th>出版社名称</th>
+
+            <th>删除（Delete）</th>
+        </tr>
+
+        </thead>
+        <tbody id="stuInfo" class="bg-warning">
+        </tbody>
+
+
+
+    </table>   </div>
+<div class="row" >
+    <div class="col-md-6" id="page_info_area"></div>
+    <div class="col-md-6" id="page_nav_area"></div>
+</div>
+</body>
+</html>

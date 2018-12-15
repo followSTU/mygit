@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sx.libarary.dao.UserTypeDao" >
+	<select id="queryUserType" resultType="com.sx.libarary.entity.UserType">
+		select user_type_id, user_type, user_type_num, user_type_day
+		from tb_user_type
+		where
+		user_type_id=#{id}
+	</select>
+</mapper>

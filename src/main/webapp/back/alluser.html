@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+
+        window.onload = function () {
+            var get = 'http://localhost:8080/libarary/getusers3';
+            var deleteuser = 'http://localhost:8080/libarary/deleteuser/';
+            showPage();
+
+            function showPage() {
+                $.ajax({
+                    url: get,
+
+                    type: "GET",
+                    success: function (result) {
+                        //显示商品数据
+                        build_alluser_table(result)
+                        console.log(result)
+                        //显示分页信息
+                        // build_page_info(result);
+                        //显示页面导航信息
+                        //  build_page_nav(result);
+                    }
+                })
+            } ;
+
+            function build_alluser_table(result) {
+                console.log("11")
+                $("#alluser_table tbody").empty();
+                var users = result.data.users;
+               // var tempPage = result.data.presses.pageNum;
+                $.each(users, function (index, item) {
+                    var idTD = $("<td></td>").append(item.userId);
+                    var nameTD = $("<td></td>").append(item.userName);
+                    var xuehaoTD = $("<td></td>").append(item.userXuehao);
+                    var emailTD = $("<td></td>").append(item.userEmail);
+                    var genderTD = $("<td></td>").append(item.userGender);
+                    var gender=item.userGender;
+                    if(gender == 0 ){
+                        var genderTD = $("<td></td>").append("女");
+                    }
+                    if(gender==1 ){
+                        var genderTD = $("<td></td>").append("男");
+                    }
+
+                    var status=item.userStatus;
+              
+                    if(status==1 ){
+                        var statusTD = $("<td></td>").append("审核通过");
+                    }
+                   
+                    var type=item.userType.userTypeId;
+                    if(type == 1 ){
+                        var typeTD = $("<td></td>").append("教师");
+                    }
+                    if(type==2 ){
+                        var typeTD = $("<td></td>").append("学生");
+                    }
+                    if(type==3 )
+                    {
+                        var typeTD = $("<td></td>").append("管理员");
+                    }
+                    var regtimeTD = $("<td></td>").append(new Date(item.userRegTime).toLocaleDateString());
+                    var deleteD = $("<button></button>").addClass("btn btn-success btn-sm delete").append(
+                        $("<span></span>").addClass("glyphicon glyphicon-trash")).append("删除");
+                    deleteD.attr("deleteUser", item.userId);
+                    //    deleteD.attr("currPage", tempPage);
+                    var deleteTD = $("<td></td>").append(deleteD);
+              
+                    $("<tr></tr>").append(idTD)
+
+                        .append(xuehaoTD)
+                        .append(nameTD)
+                        .append(emailTD)
+                        .append(genderTD)
+                        .append(typeTD)
+                        .append(statusTD)
+                        .append(regtimeTD)
+                        .append(deleteTD)
+                        .appendTo("#alluser_table tbody");
+                })
+            }
+            //删除单个用户
+            $(document).on("click", ".delete", function () {
+                var id = $(this).attr("deleteUser");
+                var name = $(this).parent().parent().find("td:eq(2)").text();
+				console.log(id)
+                var isDelete = confirm("确定要删除[" + name + "]的用户信息吗？");
+                if (isDelete) {
+                    $.ajax({
+                        url: deleteuser + id,
+                        type: "DELETE",
+                        success: function (result) {
+                            if (result.code == 0) {
+                                alert("删除成功！");
+                                showPage();
+                            } else {
+                                alert("删除用户信息出错，请重试！！！");
+                            }
+                        }
+                    })
+                }
+            })
+        }
+
+    </script>
+</head>
+<body>
+<h2 align="center">人员信息</h2>
+
+<div class="table-responsive">
+    <table  class="table table-bordered table-hover"id="alluser_table">
+        <thead>
+        <tr class="bg-warning">
+
+            <th>用户编号</th>
+            <th>用户学号</th>
+            <th>用户名称</th>
+            <th>用户邮箱</th>
+            <th>用户性别</th>
+            <th>用户身份</th>
+            <th>用户状态</th>
+            <th>用户注册时间</th>
+            <th>删除</th>
+        </tr>
+
+        </thead>
+        <tbody id="stuInfo" class="bg-warning">
+        </tbody>
+
+
+
+    </table>   </div>
+<div class="row" >
+    <div class="col-md-6" id="page_info_area"></div>
+    <div class="col-md-6" id="page_nav_area"></div>
+</div>
+</body>
+</html>

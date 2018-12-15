@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Insert title here</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script src="js/jquery.validate.min.js"></script>
+    <style type="text/css">
+        body {
+            background-image: url(img/2.jpg);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size:100% ,100%;
+        }
+        .main {
+            margin: 50px auto;
+            width: 600px;
+            height: 500px;
+            padding: 8px 10px;
+        }
+        #username-error{ color:#F00; }
+        #password-error{ color:#F00;}
+        #passagain-error{ color:#F00;}
+        #email-error{ color:#F00;}
+        #xuehao-error{ color:#F00;}
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            $("#userform").validate({
+                rules:{
+                    username:{required:true,ischinese:[2,4]},
+                    password:{required:true,minlength:6,maxlength:16},
+                    passagain:{required:true,equalTo:"#password"},
+                    email:{email:true },
+                    xuehao:{required:true,minlength:6,maxlength:16}
+                },
+                messages:{
+                    username:{required:"姓名不能为空",ischinese:"姓名长度在2到4之间并且必须为中文"},
+                    password:{required:"密码必须填写",minlength:"密码最少6位",maxlength:"密码最多16位"},
+                    passagain:{required:"再输入一次密码不能为空",equalTo:"两次输入不一致"},
+                    email:{email:"邮箱格式错误"},
+                    xuehao:{required:"学号必须填写",minlength:"学号最少6位",maxlength:"学号最多16位"}
+                }
+            })
+            jQuery.validator.addMethod("ischinese",function(value,elem,para){
+                var reg=eval("/^[\u4e00-\u9fa5]{"+para[0]+","+para[1]+"}$/");
+                return this.optional(elem)||reg.test(value);
+            })
+            function getSex(){
+                var value="";
+                var radio=document.getElementsByName("gender");
+                for(var i=0;i<radio.length;i++){
+                    if(radio[i].checked==true){
+                        value=radio[i].value;
+                        break;
+                    }
+                }if(value=='男'){
+                    var a='1';
+                }
+                if (value=='女'){
+                    var a='0';
+                }
+                return a;
+            }
+            function getStatus(){
+                var value="";
+                var radio=document.getElementsByName("status");
+                for(var i=0;i<radio.length;i++){
+                    if(radio[i].checked==true){
+                        value=radio[i].value;
+                        break;
+                    }
+                }
+                if(value=='学生'){
+                    var a=2;
+                }
+                if (value=='教师'){
+                    var a=1;
+                }
+                return a;
+            }
+
+             $("#captcha_img").click(function () {
+                 this.src = "../Kaptcha?" + Math.floor(Math.random() * 100);
+             })
+            var addBook="http://localhost:8080/libarary/adduser";
+
+            $("#addbook").click(function () {
+                 if($("#userform").valid()){
+                     var kaptchar=$("#Kaptcha").val();
+                     if(!kaptchar){
+                         alert("请输入验证码！！");
+                         $("#captcha_img").src = "../Kaptcha?" + Math.floor(Math.random() * 100);
+                         return;
+                     }
+                     var user = {};
+                     user.userName = $("#username").val();
+                     user.userPassword = $("#password").val();
+                     user.userEmail = $("#email").val();
+                     user.userXuehao=$("#xuehao").val();
+                     user.userGender = getSex();
+                     user.userTypeId=getStatus();
+
+                     var formData = new FormData();
+                     formData.append("userStr", JSON.stringify(user));
+                     formData.append("kaptcha",kaptchar);
+                     $.ajax({
+                         url:addBook,
+                         type:'POST',
+                         data:formData,
+                         contentType:false,
+                         processData:false,
+                         cash:false,
+                         success:function (result) {
+                             if(result.msg="验证码错误"){
+                                 $("#captcha_img").src = "../Kaptcha?" + Math.floor(Math.random() * 100);
+                             }else{
+                            	 window.location.href="http://localhost:8080/libarary/back/login.html";  
+                             }
+                         }
+                     })
+                 }
+            })
+        })
+    </script>
+</head>
+<body>
+<h3 align="center"></h3>
+<form id="userform">
+<div class="main">
+    <div class="form-group" style="margin-bottom: 20px;">
+        <label class="col-sm-2 control-label"
+               style="width: 130px; margin-bottom: 0px;">姓名：</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" placeholder="姓名" id="username" name="username">
+        </div>
+    </div>
+    <br> <br>
+    <div class="form-group" style="margin-bottom: 20px;">
+        <label class="col-sm-2 control-label"
+               style="width: 130px; margin-bottom: 0px;">密码：</label>
+        <div class="col-xs-6">
+            <input type="password" class="form-control" placeholder="输入密码" id="password" name="password">
+        </div>
+    </div>
+
+    <br> <br>
+    <div class="form-group" style="margin-bottom: 20px;">
+        <label class="col-sm-2 control-label"
+               style="width: 130px; margin-bottom: 0px;">再输一次密码：</label>
+        <div class="col-xs-6">
+            <input type="password" class="form-control" placeholder="再输一次密码" id="passagain" name="passagain">
+        </div>
+    </div>
+
+    <br> <br>
+    <div class="form-group" style="margin-bottom: 20px;">
+        <label class="col-sm-2 control-label"
+               style="width: 130px; margin-bottom: 0px;">学号：</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" placeholder="输入学号" id="xuehao" name="xuehao">
+        </div>
+    </div>
+    <br> <br>
+    <div class="form-group" style="margin-bottom: 20px;">
+        <label class="col-sm-2 control-label"
+               style="width: 130px; margin-bottom: 0px;">邮箱：</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" placeholder="输入邮箱" id="email" name="email">
+        </div>
+    </div>
+    <br> <br>
+    <div class="form-group" >
+        <label class="col-sm-2 control-label"
+               style="width: 180px; margin-bottom: 0px;">身份：</label>
+    <label class="radio-inline">
+         <input type="radio" name="status" value="学生" title="学生" checked="" >学生
+    </label>
+    <label class="radio-inline">
+        <input type="radio" name="status" value="教师" title="教师" > 教师
+    </label>
+
+</div>
+    <br>
+
+    <div class="form-group" >
+        <label class="col-sm-2 control-label"
+               style="width: 180px; margin-bottom: 0px;">性别：</label>
+        <label class="radio-inline">
+             <input type="radio" name="gender" value="男" title="男" checked=""  >男
+        </label>
+        <label class="radio-inline">
+             <input type="radio" name="gender" value="女" title="女"   >女
+        </label>
+    </div>
+    <br>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label"
+               style="width: 130px; margin-bottom: 0px;">验证码：</label>
+        <div class="col-xs-4">
+            <input type="text" id="Kaptcha"  class="form-control "/></div>
+        <img alt="验证按" title="点击更换" style="cursor: pointer" id="captcha_img"  src="../Kaptcha" >
+    </div>
+    <br> <br>
+    <button type="button" id="addbook" class="btn btn-primary col-xs-4" style="
+    margin-right: 50px;">注册</button>
+    <button type="reset" class="btn btn-primary col-xs-4">重置</button>
+</form>
+</div>
+
+</body>
+</html>

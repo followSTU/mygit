@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sx.libarary.dao.BookcaseDao" >
+	<select id="queryBookcase" resultType="com.sx.libarary.entity.Bookcase">
+		select bookcase_id, bookcase_name, bookcase_x, bookcase_y
+		from tb_bookcase
+		where
+		bookcase_id=#{id}
+	
+	</select>
+	<select id="queryBookcases" resultType="com.sx.libarary.entity.Bookcase">
+		select bookcase_id, bookcase_name, bookcase_x, bookcase_y
+		from tb_bookcase
+		where
+		code=0
+	</select>
+	<insert id="insertBookcase" >
+  	 INSERT INTO tb_bookcase( bookcase_name ,bookcase_x,bookcase_y)
+  	 VALUES (#{bookcaseName},#{bookcaseX},#{bookcaseY})
+  </insert>
+  <update id="updateBookcase" parameterType="com.sx.libarary.entity.Bookcase">
+  	UPDATE tb_bookcase
+  	<set>
+  		<if test="bookcaseName != null">bookcase_name = #{bookcaseName},</if>
+  		<if test="bookcaseX != null">bookcase_x= #{bookcaseX},</if>
+  		<if test="bookcaseY != null">bookcase_y = #{bookcaseY}</if>
+  	</set>
+  	WHERE
+  	bookcase_id= #{bookcaseId}
+  	</update>
+  	<update id="deleteBookcase" parameterType="com.sx.libarary.entity.Bookcase">
+  	UPDATE tb_bookcase
+  	<set>
+  		<if test="code != null">code = #{code}</if>
+  	</set>
+  	WHERE
+  	bookcase_id= #{bookcaseId}
+  	</update>
+</mapper>

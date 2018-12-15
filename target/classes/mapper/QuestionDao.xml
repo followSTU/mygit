@@ -1,0 +1,42 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.sx.libarary.dao.QuestionDao">
+ 	<select id="queryQuestion" resultType="com.sx.libarary.entity.Question">
+ 		select  
+	 	question_id, question_user_id, questtion_desc, question_jibie, question_create_time, 
+    	question_status from tb_question
+	    where 
+	    question_id=#{id}
+	    and code=0
+ 	</select>
+ 	<select id="queryQuestions" resultType="com.sx.libarary.entity.Question">
+ 		select  
+	 	question_id, question_user_id, questtion_desc, question_jibie, question_create_time, 
+    	question_status from tb_question where code=0
+ 	</select>
+ 	<insert id="insertQuestion" parameterType="com.sx.libarary.entity.Question">
+ 		insert into tb_question (question_user_id, question_desc, question_create_time) 
+	    VALUES (#{questionUserId},#{questionDesc},#{questionCreateTime})
+ 	</insert>
+
+ 	<update id="updateQuestion" parameterType="com.sx.libarary.entity.Question">
+ 		update tb_question
+ 		<set>
+ 			<if test="questionUserId != null">question_user_id=#{questionUserId},</if>
+ 			<if test="questtionDesc !=null ">questtion_desc=#{questtionDesc},</if>
+ 			<if test="questionCreateTime !=null">question_create_time=#{questionCreateTime},</if>
+ 			<if test="questionStatus !=null">question_status=#{questionStatus}</if>
+ 		</set>
+ 		where
+ 		question_id=#{questionId}
+ 	</update>
+ 	<update id="deleteQuestion" parameterType="com.sx.libarary.entity.Question">
+ 		update tb_question
+ 		<set>
+ 			<if test="code != null">code=#{code}</if>
+ 		</set>
+ 		where
+ 		question_id=#{questionId}
+ 	</update>
+ </mapper>

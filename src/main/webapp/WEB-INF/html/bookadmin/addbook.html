@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous">
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+	integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+	crossorigin="anonymous"></script>
+<style type="text/css">
+.main {
+	margin: 50px auto;
+	width: 600px;
+	height: 500px;
+	padding: 8px 10px;
+}
+</style>
+<script type="text/javascript">
+	$(function () {
+        $("#captcha_img").click(function () {
+            this.src = "../Kaptcha?" + Math.floor(Math.random() * 100);
+        })
+	    var addBook="http://localhost:8080/libarary/addbook";
+
+		$("#addbook").click(function () {
+            var kaptchar=$("#Kaptcha").val();
+            console.log(kaptchar);
+            if(!kaptchar){
+                alert("请输入验证码！！");
+                $("#captcha_img").src = "../Kaptcha?" + Math.floor(Math.random() * 100);
+                return;
+			}
+            var book={};
+            book.bookName=$("#bookname").val();
+            book.bookIsbm=$("#isbm").val();
+            book.bookPrice=$("#price").val();
+            book.bookAuthor=$("#author").val();
+            var bookimg=$("#bookimg")[0].files[0];
+            book.type ={
+                typeId: $("#booktype").find("option").not(function () {
+					return !this.selected
+                }).data("id")
+			};
+            book.press={
+                pressId: $("#press").find("option").not(function () {
+                    return !this.selected
+                }).data("id")
+			}
+			book.bookcase={
+                bookcaseId: $("#bookcase").find("option").not(function () {
+                    return !this.selected
+                }).data("id")
+			}
+			var formData=new FormData();
+            formData.append("bookImg",bookimg);
+            formData.append("bookStr",JSON.stringify(book));
+            formData.append("kaptcha",kaptchar);
+            console.log("432432");
+            console.log(formData);
+            $.ajax({
+				url:addBook,
+				type:'POST',
+				data:formData,
+				contentType:false,
+				processData:false,
+				cash:false,
+				success:function (result) {
+					if(result.msg="验证码错误"){
+                        $("#captcha_img").src = "../Kaptcha?" + Math.floor(Math.random() * 100);
+					}
+                }
+			})
+        })
+    })
+</script>
+</head>
+<body>
+<h3 align="center"></h3>
+
+<div class="main">
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书名称：</label>
+		<div class="col-xs-6">
+			<input type="text" class="form-control" placeholder="输入图书名称" id="bookname">
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书作者：</label>
+		<div class="col-xs-6">
+			<input type="text" class="form-control" placeholder="输入作者" id="author">
+		</div>
+	</div>
+
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书价格：</label>
+		<div class="col-xs-6">
+			<input type="text" class="form-control" placeholder="输入图书价格" id="price">
+		</div>
+	</div>
+
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书ISBN：</label>
+		<div class="col-xs-6">
+			<input type="text" class="form-control" placeholder="输入ISBN号" id="isbm">
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书缩略图：</label>
+		<div class="col-xs-6">
+			<input type="file" id="bookimg">
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">出版社名称：</label>
+		<div class="col-xs-6">
+			<select class="form-control" id="press">
+				<option data-id="1">1出版社</option>
+				<option data-id="2"> 2出版色</option>
+			</select>
+		</div>
+	</div>
+	<br> <br>
+
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书种类：</label>
+		<div class="col-xs-6">
+			<select class="form-control" id="booktype">
+				<option data-id="1">1图书种类</option>
+				<option data-id="2"> 2图书种类</option>
+
+			</select>
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">书架编号：</label>
+		<div class="col-xs-6">
+			<select class="form-control" id="bookcase">
+				<option data-id="1"> 1书架</option>
+				<option data-id="2">2书架</option>
+			</select>
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">验证码：</label>
+		<input type="text" id="Kaptcha" /><img alt="验证按" title="点击更换" style="cursor: pointer" id="captcha_img"  src="../Kaptcha" >
+	</div>
+	<br> <br>
+	<button type="button" id="addbook">提交</button>
+
+</div>
+
+</body>
+</html>

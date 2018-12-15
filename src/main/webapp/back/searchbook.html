@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>图书管理</title>
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+            $(function () {
+                //接受出版社和书架，种类的数据
+                var  getbookcase= 'http://localhost:8080/libarary/getbookcase';
+                var  gettype= 'http://localhost:8080/libarary/gettype';
+                var  getpress= 'http://localhost:8080/libarary/getpress';
+                aaa();
+                bbb();
+                ccc();
+                function aaa() {
+                    $.ajax({
+                        url: getbookcase,
+                        type: "GET",
+                        success: function (result) {
+                            //接受书架的数据
+                            bookcase_option(result);
+                            console.log(result)
+                        }
+                    })
+                } ;
+                function bbb() {
+                    $.ajax({
+                        url: gettype,
+                        type: "GET",
+                        success: function (result) {
+                            //接受种类的数据
+                            type_option(result);
+
+                        }
+                    })
+                } ;
+                function ccc() {
+                    $.ajax({
+                        url: getpress,
+                        type: "GET",
+                        success: function (result) {
+                            //接受出版社的数据
+                            press_option(result);
+                            console.log(result)
+                        }
+                    })
+                } ;
+                //接受书架的数据
+                function bookcase_option(result) {
+                    $("#bookcase").empty();
+                    var bookcase = result.data.bookcases;
+                    $.each(bookcase, function (index, item) {
+                        var dataid=item.bookcaseId;
+                        var bookCaseTD = $("<option data-id ="+ dataid+"></option>").append(item.bookcaseName);
+                        bookCaseTD.appendTo("#bookcase");
+                    })
+                }
+                //接受种类的数据
+                function type_option(result) {
+                    $("#booktype").empty();
+                    var types = result.data.types;
+                    $.each(types, function (index, item) {
+                        var dataid=item.typeId;
+                        var typeNameTD = $("<option data-id ="+ dataid+"></option>").append(item.typeSecondName);
+                        typeNameTD.appendTo("#booktype");
+                    })
+                }
+                //接受出版社数据
+                function press_option(result) {
+                    $("#press").empty();
+                    var presses = result.data.presses;
+                    $.each(presses, function (index, item) {
+                        var dataid=item.pressId;
+                        var pressNameTD = $("<option data-id ="+ dataid+"></option>").append(item.pressName);
+                        pressNameTD.appendTo("#press");
+                    })
+                }
+                var searchBook="http://localhost:8080/libarary/getbookbyparams";
+                $("#searchBook").click(function () {
+                    var book={};
+                    var bookname=$("#bookname").val();
+
+                    var author=$("#author").val();
+                    var isbn=$("#isbn").val();
+                    if(bookname!=null && bookname!=""){
+                        book.bookName=bookname;
+                    }
+                    if(author!=null && author!=""){
+                        book.bookAuthor=author;
+                    }
+                    if(isbn!=null && isbn!=""){
+                        book.bookIsbm=isbn;
+                    }
+                    book.typeId =$("#booktype").find("option").not(function () {
+                        return !this.selected
+                    }).data("id");
+                      	
+                    
+                    
+                    book.pressId=$("#press").find("option").not(function () {
+                            return !this.selected
+                        }).data("id");
+                    
+                    book.bookcaseId=$("#bookcase").find("option").not(function () {
+                        return !this.selected
+                    }).data("id");
+                
+                         
+                    console.log(book);
+                    var formData=new FormData();
+                    formData.append("bookParam",JSON.stringify(book));
+                    $.ajax({
+                        url:searchBook,
+                        type:'POST',
+                        contentType:false,
+                        processData:false,
+                        cash:false,
+                        data:formData,
+                        success:function (result) {
+                            build_book_table(result)
+                        }
+                    })
+                })
+                function build_book_table(result) {
+                    console.log("11")
+                    $("#book_table tbody").empty();
+                    var books = result.data.books;
+                    $.each(books, function (index, item) {
+
+                        var idTD = $("<td></td>").append(item.bookId);
+                        var nameTD = $("<td></td>").append(item.bookName);
+                        var authorTD = $("<td></td>").append(item.bookAuthor);
+                        var isbnTD = $("<td></td>").append(item.bookIsbm);
+                        var priceTD = $("<td></td>").append(item.bookPrice);
+                        var typeNameTD = $("<td></td>").append(item.type.typeSecondName);
+                        var pressNameTD = $("<td></td>").append(item.press.pressName);
+                        var bookCaseTD = $("<td></td>").append(item.bookcase.bookcaseName);
+                        var status=item.bookStatus;
+                        if(status == 0 ){
+                            var statusTD = $("<td></td>").append("预约中");
+                        }
+                        if(status==1 ){
+                            var statusTD = $("<td></td>").append("借阅中");
+                        }
+                        if(status==2 )
+                        {
+                            var statusTD = $("<td></td>").append("已归还");
+                        }
+                        var deleteD = $("<button></button>").addClass("btn btn-success btn-sm delete").append(
+                            $("<span></span>").addClass("glyphicon glyphicon-trash")).append("删除");
+                        deleteD.attr("deleteBook", item.bookId);
+                        //    deleteD.attr("currPage", tempPage);
+                        var Edit = $("<button></button>").addClass("btn btn-primary btn-sm edit").append(
+                            $("<span></span>").addClass("glyphicon glyphicon-pencil")).append("更新");
+                        Edit.attr("editStudent", item.bookId);
+                        //Edit.attr("currPage", tempPage);
+                        var deleteTD = $("<td></td>").append(deleteD);
+                        var addTD = $("<td></td>").append(Edit);
+                        $("<tr></tr>").append(idTD)
+                            .append(nameTD)
+                            .append(authorTD)
+                            .append(isbnTD)
+                            .append(priceTD)
+                            .append(statusTD)
+                            .append(typeNameTD)
+                            .append(pressNameTD)
+                            .append(bookCaseTD)
+                            .append(addTD)
+                            .append(deleteTD)
+                            .appendTo("#book_table tbody");
+                    })
+                }
+            })
+    </script>
+</head>
+<body>
+<h2 align="center">图书搜索</h2>
+<div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" style="width: 100px; margin-bottom: 0px;">图书名称：</label>
+        <div class="col-xs-2" >
+            <input type="text" class="form-control" placeholder="输入图书名称" id="bookname">
+        </div>
+    </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"
+                   style="width: 100px; margin-bottom: 0px;">图书作者：</label>
+            <div class="col-xs-2" >
+                <input type="text" class="form-control" placeholder="输入作者" id="author">
+            </div>
+        </div>
+
+    <div class="form-group">
+    <label class="col-sm-2 control-label"
+           style="width: 120px; margin-bottom: 0px;">出版社名称：</label>
+    <div class="col-xs-2" >
+        <select class="form-control" id="press">
+            <option></option>
+        </select>
+    </div>
+    </div>
+
+    <br> <br>
+    <div class="form-group" style="
+    margin-top: 10px;">
+        <label class="col-sm-2 control-label"
+               style="width: 100px; margin-bottom: 0px;">图书种类：</label>
+        <div class="col-xs-2" >
+            <select class="form-control" id="booktype">
+                <option>  </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label"
+               style="width: 100px; margin-bottom: 0px;">书架编号：</label>
+        <div class="col-xs-2" >
+            <select class="form-control" id="bookcase">
+                <option>  </option>
+            </select>
+        </div>
+    </div>
+    <!-- Deemphasize a button by making it look like a link while maintaining button behavior -->
+    <button type="button" id="searchBook" class="btn btn-primary col-xs-4" style="width: 100px;">搜索</button>
+    <br> <br><br>
+
+</div>
+<div class="table-responsive">
+    <table  class="table table-bordered table-hover"id="book_table">
+        <thead>
+        <tr class="bg-warning">
+
+            <th>图书编号</th>
+            <th>图书名称</th>
+            <th>作者</th>
+            <th>ISBN</th>
+            <th>图书价格</th>
+            <th>图书状态</th>
+            <th>图书种类</th>
+            <th>出版社</th>
+            <th>书架</th>
+            <th>更新（Edit）</th>
+            <th>删除（Delete）</th>
+        </tr>
+
+        </thead>
+        <tbody id="stuInfo" class="bg-warning">
+        </tbody>
+
+
+
+    </table>   </div>
+<div class="row" >
+    <div class="col-md-6" id="page_info_area"></div>
+    <div class="col-md-6" id="page_nav_area"></div>
+</div>
+
+
+
+</body>
+</html>

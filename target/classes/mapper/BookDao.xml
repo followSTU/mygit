@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sx.libarary.dao.BookDao">
+	<resultMap id="BookMap" type="com.sx.libarary.entity.Book">
+		<id column="book_id" property="bookId"></id>
+		<result column="book_isbm" property="bookIsbm"/>
+		<result column="book_name" property="bookName"/>
+		<result column="book_author" property="bookAuthor"/>
+		<result column="book_price" property="bookPrice"/>
+		<result column="book_status" property="bookStatus"/>
+		<result column="book_img_addr" property="bookImgAddr"/>
+		<association property="type" column="type_id" javaType="com.sx.libarary.entity.Type">
+			<id column="type_id" property="typeId"></id>
+			<result column="type_name" property="typeName"/>
+			<result column="type_second_name" property="typeSecondName"/>
+		</association>
+		<association property="press" column="press_id" javaType="com.sx.libarary.entity.Press">
+			<id column="press_id" property="pressId"></id>
+			<result column="press_name" property="pressName"></result>
+		</association>
+		<association property="bookcase" column="bookcase_id" javaType="com.sx.libarary.entity.Bookcase">
+			<id column="bookcase_id" property="bookcaseId"></id>
+			<result column="bookcase_name" property="bookcaseName"></result>
+			<result column="bookcase_x" property="bookcaseX"/>
+			<result column="bookcase_y" property="bookcaseY"/>
+		</association>
+	</resultMap>
+    <select id="queryBooks" resultMap="BookMap">
+		SELECT
+		book_id,type_id,press_id,bookcase_id,book_isbm,book_name,book_author,book_price,
+		book_status,book_img_addr
+		FROM
+		tb_book
+		where code=0
+		ORDER BY
+		book_id DESC;
+	</select>
+	 <select id="queryBooksByParams" resultMap="BookMap">
+		SELECT
+		book_id,type_id,press_id,bookcase_id,book_isbm,book_name,book_author,book_price,
+		book_status,book_img_addr
+		FROM
+		tb_book
+		<where>
+			<if test="book.bookName !=null">
+				and book_name=#{book.bookName}
+			</if>
+			<if test="book.bookAuthor !=null">
+				and book_author=#{book.bookAuthor}
+			</if>
+			<if test="book.pressId !=null">
+				and press_id=#{book.pressId}
+			</if>
+			<if test="book.typeId !=null">
+				and type_id=#{book.typeId}
+			</if>
+			<if test="book.bookcaseId !=null">
+				and bookcase_id=#{book.bookcaseId}
+			</if>
+			<if test="book.bookIsbm !=null">
+				and book_isbm=#{book.bookIsbm}
+			</if>
+			
+			<if test="book.bookStatus !=null">
+				and book_status=#{book.bookStatus}
+			</if>
+		</where>
+		and
+		code = 0
+		ORDER BY
+		book_id DESC;
+	</select>
+	 <select id="queryBook" resultMap="BookMap">
+		SELECT
+		book_id,type_id,press_id,bookcase_id,book_isbm,book_name,book_author,book_price,
+		book_status,book_img_addr
+		FROM
+		tb_book
+		where
+		book_id=#{id}
+	</select>
+	<insert id="insertBook" useGeneratedKeys="true" keyProperty="bookId"
+		keyColumn="book_id">
+		insert into tb_book(type_id,press_id,bookcase_id,book_isbm,book_name,book_author,book_price,
+		book_status,book_img_addr)
+		values
+		(#{type.typeId},#{press.pressId},#{bookcase.bookcaseId},#{bookIsbm},#{bookName},#{bookAuthor},
+		#{bookPrice},#{bookStatus},#{bookImgAddr})
+	</insert>
+	<update id="updateBook" parameterType="com.sx.libarary.entity.Book">
+		update tb_book
+		<set>
+			<if test="type.typeId != null">type_id=#{type.typeId},</if>
+			<if test="press.pressId != null">press_id=#{press.pressId},</if>
+			<if test="bookcase.bookcaseId != null">bookcase_id=#{bookcase.bookcaseId},</if>
+			<if test="bookIsbm != null">book_isbm=#{bookIsbm},</if>
+			<if test="bookName != null">book_name=#{bookName},</if>
+			<if test="bookAuthor != null">book_author=#{bookAuthor},</if>
+			<if test="bookPrice != null">book_price=#{bookPrice},</if>
+			<if test="bookStatus != null">book_status=#{bookStatus},</if>
+			<if test="bookImgAddr != null">book_img_addr=#{bookImgAddr}</if>
+		</set>
+		where
+		book_id=#{bookId}
+	</update>
+	<update id="deleteBook" parameterType="com.sx.libarary.entity.Book">
+		update tb_book
+		<set>
+			<if test="code != null">code=#{code}</if>
+		</set>
+		where
+		book_id=#{bookId}
+	</update>
+
+</mapper>

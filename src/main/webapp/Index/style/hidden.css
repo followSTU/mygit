@@ -1,0 +1,4 @@
+#divs div{width: 160px;height: 60px;border-radius: 10px;text-align: center;background-color:rgb(52, 198, 99);line-height: 60px;
+    margin-top: 20px;margin-left: 20px;cursor: pointer;
+}
+#hidden{display: none;}

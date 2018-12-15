@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+
+        window.onload = function () {
+            var get = 'http://localhost:8080/libarary/getquestions';
+            showPage();
+
+            function showPage() {
+                $.ajax({
+                    url: get,
+
+                    type: "GET",
+                    success: function (result) {
+                        //显示商品数据
+                        build_question_table(result)
+                        console.log(result)
+                        //显示分页信息
+                        // build_page_info(result);
+                        //显示页面导航信息
+                        //  build_page_nav(result);
+                    }
+                })
+            } ;
+
+            function build_question_table(result) {
+                console.log("11")
+                $("#question_table tbody").empty();
+                var questions = result.data.questions;
+               
+                $.each(questions, function (index, item) {
+
+
+                    var idTD = $("<td></td>").append(item.questionId);
+                    var nameTD = $("<td></td>").append(item.user.userName);
+                    var descTD = $("<td></td>").append(item.questtionDesc);
+                    var status=item.questionStatus;
+                    if(status == 0 ){
+                        var statusTD = $("<td></td>").append("等待审批");
+                    }
+                    if(status==1 ){
+                        var statusTD = $("<td></td>").append("审批通过");
+                    }
+                    if(status==2 )
+                    {
+                        var statusTD = $("<td></td>").append("审批不通过");
+                    }
+                    var createtimeTD = $("<td></td>").append(new Date(item.questionCreateTime).toLocaleDateString());
+                    if(status==0){
+                    var passD = $("<button></button>").addClass("btn btn-success btn-sm delete").append(
+                        $("<span></span>")).append("审核通过");
+                    var nopassD = $("<button></button>").addClass("btn btn-primary btn-sm edit").append(
+                        $("<span></span>")).append("审核不通过");
+                    }
+                    else {    var passD = $("<button disabled='true'></button>").addClass("btn btn-success btn-sm delete").append(
+                        $("<span></span>")).append("审核通过");
+                        var nopassD = $("<button disabled='true'></button>").addClass("btn btn-primary btn-sm edit").append(
+                            $("<span></span>")).append("审核不通过");
+                    }
+                    nopassD.attr("nopass", item.questionId);
+                    passD.attr("pass", item.questionId);
+                    var passTD = $("<td></td>").append(passD);
+                    var nopassTD = $("<td></td>").append(nopassD);
+                    $("<tr></tr>").append(idTD)
+
+                        .append(nameTD)
+                        .append(descTD)
+                        .append(createtimeTD)
+                        .append(statusTD)
+                        .append(passTD)
+                        .append(nopassTD)
+                        .appendTo("#question_table tbody");
+                })
+            }
+            var shenhe="http://localhost:8080/libarary/questionshenhe";
+            $(document).on("click", ".delete", function () {
+                var id = $(this).attr("pass");
+                var userid=id+"";
+                var formData=new FormData();
+                formData.append("questionId",userid);
+                formData.append("biaoshi","1");
+                $.ajax({
+                    url:shenhe,
+                    type:'POST',
+                    contentType:false,
+                    processData:false,
+                    cash:false,
+                    data:formData,
+                    success:function (result) {
+                        if(result.data.success){
+                            alert("操作成功");
+                            showPage();
+                        }else {
+                            alert("操作失败");
+                        }
+                    }
+                })
+            })
+            //不通过
+            $(document).on("click", ".edit", function () {
+                var id = $(this).attr("nopass");
+                var userid=id+"";
+                var formData=new FormData();
+                formData.append("questionId",userid);
+                formData.append("biaoshi","2");
+                $.ajax({
+                    url:shenhe,
+                    type:'POST',
+                    contentType:false,
+                    processData:false,
+                    cash:false,
+                    data:formData,
+                    success:function (result) {
+                        if(result.data.success){
+                            alert("操作成功");
+                            showPage();
+                        }else {
+                            alert("操作失败");
+                        }
+                    }
+                })
+            })
+        }
+
+    </script>
+</head>
+<body>
+<h2 align="center">建议管理</h2>
+
+<div class="table-responsive">
+    <table  class="table table-bordered table-hover"id="question_table">
+        <thead>
+        <tr class="bg-warning">
+            <th>建议编号</th>
+            <th>建议人</th>
+            <th>建议描述</th>
+            <th>建议提出时间</th>
+            <th>建议状态</th>
+            <th>建议通过</th>
+            <th>建议不通过</th>
+        </tr>
+
+        </thead>
+        <tbody id="stuInfo" class="bg-warning">
+        </tbody>
+
+
+
+    </table>   </div>
+<div class="row" >
+    <div class="col-md-6" id="page_info_area"></div>
+    <div class="col-md-6" id="page_nav_area"></div>
+</div>
+</body>
+</html>

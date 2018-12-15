@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>图书管理</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(function () {
+            var searchUsers="http://localhost:8080/libarary/getBrrowByXuehao/";
+            $("#searchUsers").click(function () {
+                var xuehao=$("#xuehao").val();
+                var userXuehao;
+                if(xuehao!=null && xuehao!=""){
+                	userXuehao=xuehao;
+                }
+                $.ajax({
+                    url:searchUsers+userXuehao,
+                    type:'POST',
+                    contentType:false,
+                    processData:false,
+                    cash:false,
+                    success:function (result) {
+                        build_user_data(result)
+                    }
+                })
+            })
+            function build_user_data(result) {
+
+                $("#book_table tbody").empty();
+                var brrows = result.data.brrows;
+                $.each(brrows, function (index, item) {
+                	 var status = item.brrowBookStatus;
+                
+                	if(status=="1"){
+                    var idTD = $("<td></td>").append(item.book.bookId);
+                    var nameTD = $("<td></td>").append(item.book.bookName);
+                    var usernameTD = $("<td></td>").append(item.user.userName);
+                    var xuehaoTD = $("<td></td>").append(item.user.userXuehao);
+                    var jieshuTD = $("<td></td>").append(new Date(item.brrowBookJieshu).toLocaleDateString());
+                    var huanshuTD = $("<td></td>").append(new Date(item.brrowBookHuanshu).toLocaleDateString());
+                        var Edit = $("<button></button>").addClass("btn btn-primary btn-sm edit").append(
+                            $("<span></span>").addClass("glyphicon glyphicon-pencil")).append("续借");
+                        Edit.attr("renew", item.brrowId);
+                        var addTD = $("<td></td>").append(Edit);
+                    $("<tr></tr>").append(idTD)
+                        .append(nameTD)
+                        .append(usernameTD)
+                        .append(xuehaoTD)
+                        .append(jieshuTD)
+                        .append(huanshuTD)
+                        .append(addTD)
+                        .appendTo("#book_table tbody");
+                	}
+                })
+            }
+            //续借操作
+            var xujie="http://localhost:8080/libarary/xujie/";
+            $(document).on("click", ".edit", function () {
+                var id = $(this).attr("renew");
+                var name = $(this).parent().parent().find("td:eq(1)").text();
+                var isDelete = confirm("确定要继续借阅[" + name + "]30天吗？");
+                if(isDelete) {
+                    $.ajax({
+                        url: xujie+id,
+                        type: 'POST',
+                        contentType: false,
+                        processData: false,
+                        cash: false,
+
+                        success: function (result) {
+                            if (result.data.success) {
+                                alert("操作成功");
+
+                            } else {
+                                alert("操作失败");
+                            }
+                        }
+                    })
+                }
+            })
+        })
+    </script>
+</head>
+<body>
+<h2 align="center">图书续借</h2>
+<div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" style="width: 150px; margin-bottom: 0px;">（学号/工号）：</label>
+        <div class="col-xs-2" >
+            <input type="text" class="form-control" placeholder="输入学号/工号" id="xuehao">
+        </div>
+    </div>
+
+
+    <!-- Deemphasize a button by making it look like a link while maintaining button behavior -->
+    <button type="button" id="searchUsers" class="btn btn-primary col-xs-4" style="width: 100px;">搜索</button>
+
+    <br> <br><br>
+
+</div>
+<div class="table-responsive">
+    <table  class="table table-bordered table-hover"id="book_table">
+        <thead>
+        <tr class="bg-warning">
+
+            <th>图书编号</th>
+            <th>图书名称</th>
+            <th>借阅人</th>
+            <th>借阅人（学号/工号）</th>
+            <th>借书时间</th>
+            <th>还书时间</th>
+            <th>续借</th>
+        </tr>
+
+        </thead>
+        <tbody id="stuInfo" class="bg-warning">
+        </tbody>
+
+
+
+    </table>   </div>
+<div class="row" >
+    <div class="col-md-6" id="page_info_area"></div>
+    <div class="col-md-6" id="page_nav_area"></div>
+</div>
+
+
+
+</body>
+</html>

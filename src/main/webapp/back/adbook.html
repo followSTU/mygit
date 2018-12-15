@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous">
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+	integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+	crossorigin="anonymous"></script>
+<style type="text/css">
+	body {
+		background-image: url(img/4.jpg);
+		background-repeat: no-repeat;
+		background-attachment: fixed;
+		background-size:100% ,100%;
+	}
+.main {
+	margin: 50px auto;
+	width: 600px;
+	height: 500px;
+	padding: 8px 10px;
+}
+</style>
+<script type="text/javascript">
+	$(function () {
+        //接受出版社和书架，种类的数据
+        var  getbookcase= 'http://localhost:8080/libarary/getbookcase';
+        var  gettype= 'http://localhost:8080/libarary/gettype';
+        var  getpress= 'http://localhost:8080/libarary/getpress';
+        aaa();
+        bbb();
+        ccc();
+        function aaa() {
+            $.ajax({
+                url: getbookcase,
+                type: "GET",
+                success: function (result) {
+                    //接受书架的数据
+                    bookcase_option(result);
+                    console.log(result)
+                }
+            })
+        } ;
+        function bbb() {
+            $.ajax({
+                url: gettype,
+                type: "GET",
+                success: function (result) {
+                    //接受种类的数据
+                    type_option(result);
+             
+                }
+            })
+        } ;
+        function ccc() {
+            $.ajax({
+                url: getpress,
+                type: "GET",
+                success: function (result) {
+                    //接受出版社的数据
+                    press_option(result);
+                    console.log(result)
+                }
+            })
+        } ;
+        //接受书架的数据
+        function bookcase_option(result) {
+            $("#bookcase").empty();
+            var bookcase = result.data.bookcases;
+            $.each(bookcase, function (index, item) {
+            	var dataid=item.bookcaseId;
+                var bookCaseTD = $("<option data-id ="+ dataid+"></option>").append(item.bookcaseName);
+      		    bookCaseTD.appendTo("#bookcase");
+            })
+        }
+        //接受种类的数据
+        function type_option(result) {
+            $("#booktype").empty();
+            var types = result.data.types;
+            $.each(types, function (index, item) {
+            	var dataid=item.typeId;
+                var typeNameTD = $("<option data-id ="+ dataid+"></option>").append(item.typeSecondName);
+				typeNameTD.appendTo("#booktype");
+            })
+        }
+        //接受出版社数据
+        function press_option(result) {
+            $("#press").empty();
+            var presses = result.data.presses;
+            $.each(presses, function (index, item) {
+            	var dataid=item.pressId;
+                var pressNameTD = $("<option data-id ="+ dataid+"></option>").append(item.pressName);
+           		pressNameTD.appendTo("#press");
+            })
+        }
+        //获取验证码图片
+        $("#captcha_img").click(function () {
+            this.src = "../Kaptcha?" + Math.floor(Math.random() * 100);
+        })
+	    var addBook="http://localhost:8080/libarary/addbook";
+
+		$("#addbook").click(function () {
+            var kaptchar=$("#Kaptcha").val();
+            console.log(kaptchar);
+            if(!kaptchar){
+                alert("请输入验证码！！");
+                $("#captcha_img").src = "../Kaptcha?" + Math.floor(Math.random() * 100);
+                return;
+			}
+            var book={};
+            book.bookName=$("#bookname").val();
+            book.bookIsbm=$("#isbm").val();
+            book.bookPrice=$("#price").val();
+            book.bookAuthor=$("#author").val();
+            var bookimg=$("#bookimg")[0].files[0];
+            book.type ={
+                    typeId: $("#booktype").find("option").not(function () {
+    					return !this.selected
+                    }).data("id")
+    			};
+          	 book.press={
+                    pressId: $("#press").find("option").not(function () {
+                        return !this.selected
+                    }).data("id")
+    			};
+    		book.bookcase={
+                    bookcaseId: $("#bookcase").find("option").not(function () {
+                        return !this.selected
+                    }).data("id")
+    			};
+            console.log(book);
+			var formData=new FormData();
+            formData.append("bookImg",bookimg);
+            formData.append("bookStr",JSON.stringify(book));
+            formData.append("kaptcha",kaptchar);
+            $.ajax({
+				url:addBook,
+				type:'POST',
+				data:formData,
+				contentType:false,
+				processData:false,
+				cash:false,
+				success:function (result) {
+					if(result.data.success){
+						alert("添加成功");
+					}else if(!result.data.success){
+						alert("添加失败");
+					}else{
+						alert("验证码错误");
+						$("#captcha_img").src = ".../Kaptcha?" + Math.floor(Math.random() * 100);
+					}
+                }
+			})
+        })
+    })
+</script>
+</head>
+<body>
+<h3 align="center"></h3>
+<form>
+<div class="main">
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书名称：</label>
+		<div class="col-xs-6">
+			<input type="text" class="form-control" placeholder="输入图书名称" id="bookname">
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书作者：</label>
+		<div class="col-xs-6">
+			<input type="text" class="form-control" placeholder="输入作者" id="author">
+		</div>
+	</div>
+
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书价格：</label>
+		<div class="col-xs-6">
+			<input type="text" class="form-control" placeholder="输入图书价格" id="price">
+		</div>
+	</div>
+
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书ISBN：</label>
+		<div class="col-xs-6">
+			<input type="text" class="form-control" placeholder="输入ISBN号" id="isbm">
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书缩略图：</label>
+		<div class="col-xs-6">
+			<input type="file" id="bookimg">
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">出版社名称：</label>
+		<div class="col-xs-6">
+			<select class="form-control" id="press">
+				
+			</select>
+		</div>
+	</div>
+	<br> <br>
+
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">图书种类：</label>
+		<div class="col-xs-6">
+			<select class="form-control" id="booktype">
+			
+
+			</select>
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">书架编号：</label>
+		<div class="col-xs-6">
+			<select class="form-control" id="bookcase">
+				
+			</select>
+		</div>
+	</div>
+	<br> <br>
+	<div class="form-group">
+		<label class="col-sm-2 control-label"
+			   style="width: 130px; margin-bottom: 0px;">验证码：</label>
+		<div class="col-xs-4">
+		<input type="text" id="Kaptcha"  class="form-control "/></div>
+		<img alt="验证按" title="点击更换" style="cursor: pointer" id="captcha_img"  src="../Kaptcha" >
+	</div>
+	<br> <br>
+	<button type="button" id="addbook" class="btn btn-primary col-xs-4" style="
+    margin-right: 50px;">添加</button>
+	<button type="reset" class="btn btn-primary col-xs-4">重置</button>
+</div>
+</form>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sx.libarary.dao.BrrowDao">
+<resultMap id="brrowMap" type="com.sx.libarary.entity.Brrow">
+	    <id column="brrow_id" property="brrowId" />
+	    <result column="brrow_book_status"  property="brrowBookStatus" />
+	    <result column="brrow_book_jieshu"  property="brrowBookJieshu" />
+	    <result column="brrow_book_huanshu"  property="brrowBookHuanshu" />
+	    <association  property="book"  column="brrow_book_id" javaType="com.sx.libarary.entity.Book">
+	    	<id column="book_id" property="bookId"></id>
+	    	<result column="book_name" property="bookName"></result>
+	    	<result column="book_author" property="bookAuthor"></result>
+	    	<result column="book_isbm" property="bookIsbm"/>
+	    </association>
+	    <association  property="user" column="brrow_book_user" javaType="com.sx.libarary.entity.User">
+	    	<id column="user_id" property="userId"></id>
+	    	<result column="user_name" property="userName"></result>
+	    	<result column="user_xuehao" property="userXuehao"></result>
+	    </association>
+ </resultMap>
+ <select id="queryBrrowsByStatus" resultType="com.sx.libarary.entity.Brrow">
+ 	select  
+ 	brrow_id, brrow_book_id, brrow_book_user, brrow_book_status, brrow_book_jieshu, brrow_book_huanshu  
+ 	from tb_brrow 
+ 	where
+ 	brrow_book_status = #{status}
+ </select>
+ <select id="queryBrrowsByUser" resultMap="brrowMap">
+ 	select
+ 	a.brrow_id, a.brrow_book_status, a.brrow_book_jieshu, a.brrow_book_huanshu,
+ 	b.book_id, b.book_name,b.book_author,
+ 	d.user_id,d.user_name,d.user_xuehao
+ 	from
+	tb_brrow  a,tb_book  b,tb_user  d
+ 	where
+ 	a.brrow_book_id = b.book_id
+	and
+ 	a.brrow_book_user = d.user_id
+ 	and
+ 	d.user_xuehao=#{useXuehao}
+</select>
+ <select id="queryBrrow" resultMap="brrowMap">
+ 	select
+ 	a.brrow_id, a.brrow_book_status, a.brrow_book_jieshu, a.brrow_book_huanshu,
+ 	b.book_id, b.book_name,b.book_author,
+ 	d.user_id,d.user_name,d.user_xuehao
+ 	from
+	tb_brrow  a,tb_book  b,tb_user  d
+ 	where
+ 	a.brrow_book_id = b.book_id
+	and
+ 	a.brrow_book_user = d.user_id
+ 	and
+ 	a.brrow_id=#{id}
+</select>
+<select id="queryBrrowBookCount" resultMap="brrowMap">
+	select
+ 	a.brrow_id, a.brrow_book_status, a.brrow_book_jieshu, a.brrow_book_huanshu,
+ 	b.book_id, b.book_name,b.book_author,
+ 	d.user_id,d.user_name,d.user_xuehao
+ 	from
+	tb_brrow  a,tb_book  b,tb_user  d
+ 	where
+ 	a.brrow_book_id = b.book_id
+	and
+ 	a.brrow_book_user = d.user_id
+ 	and
+ 	d.user_xuehao=#{useXuehao}
+ 	and
+ 	a.brrow_book_status=1
+</select>
+<select id="queryBrrowBookByParam" resultMap="brrowMap">
+	select
+ 	a.brrow_id, a.brrow_book_status, a.brrow_book_jieshu, a.brrow_book_huanshu,
+ 	b.book_id, b.book_name,b.book_author,b.book_isbm,
+ 	d.user_id,d.user_name,d.user_xuehao
+ 	from
+	tb_brrow  a,tb_book  b,tb_user  d
+ 	where
+ 	a.brrow_book_id = b.book_id
+	and
+ 	a.brrow_book_user = d.user_id
+ 	and
+ 	a.brrow_book_status='1'
+ 		<if test="book.bookName!=null">and b.book_name=#{book.bookName} </if> 
+ 		<if test="book.bookAuthor!=null">and b.book_author=#{book.bookAuthor} </if> 
+ 		<if test="book.bookIsbm!=null">and b.book_isbm=#{book.bookIsbm}</if>
+
+</select>
+<insert id="insertBrrow">
+	insert into tb_brrow (brrow_book_id, brrow_book_user, brrow_book_status, brrow_book_jieshu, brrow_book_huanshu)
+	values(#{brrowBookId},#{brrowBookUser},#{brrowBookStatus},#{brrowBookJieshu},#{brrowBookHuanshu})
+</insert>
+<update id="updateBrrow" parameterType="com.sx.libarary.entity.Brrow">
+	update tb_brrow
+	<set>
+		<if test="brrowBookHuanshu !=null">brrow_book_huanshu=#{brrowBookHuanshu},</if>
+		<if test="brrowBookStatus !=null">brrow_book_status=#{brrowBookStatus}</if>
+	</set>
+	where brrow_id=#{brrowId}
+</update>
+
+
+ 
+</mapper>

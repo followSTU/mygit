@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sx.libarary.dao.PressDao">
+	<select id="queryPress" resultType="com.sx.libarary.entity.Press">
+		select   press_id, press_name 
+		from tb_press 
+		where
+		press_id = #{id}
+	
+	</select>
+<select id="queryPresss"  resultType="com.sx.libarary.entity.Press">
+  	select press_id, press_name 
+  	from tb_press 
+  	where code=0
+  	order by press_id desc
+  </select>
+  <insert id="insertPress" >
+  	 INSERT INTO tb_press( press_name )
+  	 VALUES (#{pressName})
+  </insert>
+  <update id="updatePress" parameterType="com.sx.libarary.entity.Press">
+  	UPDATE tb_press
+  	<set>
+  		<if test="pressName != null">press_name = #{pressName},</if>
+  	</set>
+  	WHERE
+  	press_id= #{pressId}
+  </update>
+  <update id="deletePress" parameterType="com.sx.libarary.entity.Press">
+  	UPDATE tb_press
+  	<set>
+  		<if test="code != null">code=#{code}</if>
+  	</set>
+  	WHERE
+  	press_id= #{pressId}
+  </update>
+
+</mapper>
